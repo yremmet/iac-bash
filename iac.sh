@@ -1,9 +1,10 @@
 #!/bin/bash
+pathdir=$(dirname $0)
 if [[ ! -f output.sh ]]; then
-    curl https://gist.githubusercontent.com/yremmet/1a77ac70b1a24cb901e28233219c5663/raw/b93d4a52be6e5572998ef1deb1f172599a68f919/output.sh -o output.sh
+    curl https://gist.githubusercontent.com/yremmet/1a77ac70b1a24cb901e28233219c5663/raw/03ff6ba5616be78195a4d09263d8a48cfc943805/output.sh -o output.sh
 fi
-. output.sh
-. state.sh
+. $pathdir/output.sh
+. $pathdir/state.sh
 
 pushd () {
     command pushd "$@" > /dev/null
@@ -41,6 +42,11 @@ function check(){
     [[ $1 == "" ]] && fail "Usage idt $command \$deployment_name"
     [[ -d $1 ]] || fail "Deployment $1 doesn't exists"
     [[ -f $1/docker-compose.yaml ]] || fail "Deployment $1/docker-compose.yaml doesn't exists"
+}
+
+function checkDir(){
+    git status > /dev/null || fail "Called from a directory without git folder. No valid working directory."
+    [[ $(git branch | grep -c state) == 0 ]] && warn "State Branch missing run iac init_state"
 }
 
 function images(){
@@ -104,8 +110,11 @@ function start(){
     waitForUp $1
 }
 
+checkDir
+
 command=$1
 shift
+
 case $command in
     deployments|d)
         deployments $@;;
