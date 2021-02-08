@@ -5,6 +5,13 @@ fi
 . output.sh
 . state.sh
 
+pushd () {
+    command pushd "$@" > /dev/null
+}
+
+popd () {
+    command popd "$@" > /dev/null
+}
 
 function deployments(){
     header Deployments
@@ -22,11 +29,11 @@ function manifest(){
     echo::blue "Remote:  $(git remote get-url origin)"
     if [[ $(git status --porcelain | wc -l) -gt 0 ]]; then
         echo::red "Uncommited changes:"
-        for x in $(git status --porcelain | cut -d' ' -f2); do
-            echo::red "  $x"
+        for x in $(git status --porcelain | awk '{print $2}' ); do
+            echo::red " - $x"
         done
     else
-        echo::green "Repo is clean"
+        ok  "Repo is clean"
     fi
 }
 
@@ -42,7 +49,7 @@ function images(){
     header "Images For deployment $deployment"
     for image in $(cat $deployment/docker-compose.yaml | grep image | cut -d':'  -f2); do
         details=$(docker images  | grep $image | grep -v none | head -n1)
-        echo::blue "$image\t$(echo $details |  awk '{print $2}') \t$(echo $details |  awk '{print $3}')"
+        info "$image\t$(echo $details |  awk '{print $2}') \t$(echo $details |  awk '{print $3}')"
     done
 }
 
@@ -55,7 +62,7 @@ function waitForUp(){
         for i in {1..10}; do
             if [[ $(docker-compose ps | awk 'NR > 2 {print $0}' | grep Up | wc -l) == $services ]]; then
                 echo ""
-                echo::green "$deployment is fully up"
+                ok "$deployment is fully up"
                 return
             fi
             printf "."
@@ -117,5 +124,9 @@ case $command in
     ## META
     init_state)
         state::init;;
+
+    ## Default
+    *)
+        help;;
 
 esac
