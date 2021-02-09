@@ -1,10 +1,11 @@
 #!/bin/bash
 pathdir=$(dirname $0)
 if [[ ! -f output.sh ]]; then
-    curl https://gist.githubusercontent.com/yremmet/1a77ac70b1a24cb901e28233219c5663/raw/03ff6ba5616be78195a4d09263d8a48cfc943805/output.sh -o output.sh
+    curl https://gist.github.com/yremmet/1a77ac70b1a24cb901e28233219c5663/raw -o output.sh
 fi
 . $pathdir/output.sh
 . $pathdir/state.sh
+. $pathdir/add.sh
 
 pushd () {
     command pushd "$@" > /dev/null
@@ -110,8 +111,18 @@ function start(){
     waitForUp $1
 }
 
-checkDir
+function help(){
+    printTableHead Command Shortcurt Arguments Description
+    printTable add "" "" "Adding new deployment (experimental)"
+    printTable deployments d "" "List deployments ins current landscape directory"
+    printTableAlt images img "deploymentName" "Lists the images used by deployment"
+    printTable update u "deploymentName" "Updates deployment to newest images"
+    printTableAlt start "" "deploymentName" "Starts Deployment"
+    printTable stop "" "deploymentName" "Stops Deployment"
+    printTableAlt manifest "" "" "List state of Landscape directory"
+}
 
+checkDir
 command=$1
 shift
 
@@ -130,6 +141,8 @@ case $command in
         start $@;;
     stop)
         stop $@;;
+    add)
+        add $@;;
     ## META
     init_state)
         state::init;;
