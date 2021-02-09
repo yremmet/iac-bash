@@ -1,7 +1,7 @@
 #!/bin/bash
 pathdir=$(dirname $0)
 if [[ ! -f output.sh ]]; then
-    curl https://gist.github.com/yremmet/1a77ac70b1a24cb901e28233219c5663/raw -o output.sh
+    curl https://gist.github.com/yremmet/1a77ac70b1a24cb901e28233219c5663/raw -Lo output.sh
 fi
 . $pathdir/output.sh
 . $pathdir/state.sh
