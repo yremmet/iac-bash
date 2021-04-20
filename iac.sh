@@ -1,6 +1,6 @@
 #!/bin/bash
 pathdir=$(dirname $0)
-if [[ ! -f output.sh ]]; then
+if [[ ! -f output.sh && $(find "output.sh" -mtime +14 -print) ]]; then
     curl https://gist.github.com/yremmet/1a77ac70b1a24cb901e28233219c5663/raw -Lo output.sh
 fi
 . $pathdir/output.sh
@@ -23,6 +23,15 @@ function deployments(){
             echo::blue "- $deployment"
         fi
     done
+}
+
+function upgrade(){
+    info "Updgrading output helper"
+    curl https://gist.github.com/yremmet/1a77ac70b1a24cb901e28233219c5663/raw -Lo output.sh
+    TAR=$(url --silent "https://api.github.com/repos/yremmet/iac-bash/releases/latest" | jq -r .tarball_url)
+    curl $TAR -o update.tar.gz
+    tar -xvf update.tar.gz  --strip-components 1
+    rm -rf $TAR
 }
 
 function manifest(){
@@ -137,6 +146,8 @@ case $command in
         manifest $@;;
     update|u)
         update $@;;
+    upgrade)
+        upgrade;;
     start)
         start $@;;
     stop)
