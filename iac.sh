@@ -28,10 +28,11 @@ function deployments(){
 function upgrade(){
     info "Updgrading output helper"
     curl https://gist.github.com/yremmet/1a77ac70b1a24cb901e28233219c5663/raw -Lo output.sh
-    TAR=$(url --silent "https://api.github.com/repos/yremmet/iac-bash/releases/latest" | jq -r .tarball_url)
-    curl $TAR -o update.tar.gz
+    TAR=$(curl --silent "https://api.github.com/repos/yremmet/iac-bash/releases/latest" | jq -r .tarball_url)
+    info "Updgrading"
+    curl $TAR -Lo update.tar.gz
     tar -xvf update.tar.gz  --strip-components 1
-    rm -rf $TAR
+    rm -rf update.tar.gz
 }
 
 function manifest(){
